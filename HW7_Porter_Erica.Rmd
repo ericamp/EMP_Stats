@@ -1,0 +1,143 @@
+---
+title: "HW7_Porter_Erica"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.pos = "h")
+library(stargazer)
+library(data.table)
+library(lubridate)
+library(lintr)
+library(data.table)
+library(knitr)
+library(foreach)
+library(doParallel)
+library(doRNG)
+knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 60), tidy = T, message = F, warning = F)
+```
+
+```{r Problem2_sum_squares, echo = F, eval = T, include = T}
+# Problem 2: calculating sum of squares
+
+# generate data
+set.seed(12345)
+y <- rnorm(n = 1e+07, mean = 1, sd = 1)
+
+# Part A: calculate sum of squares with summation and for loop (record time)
+sum_sq = 0
+n <- length(y)
+diff_sq <- rep(0, 1e+07)
+y_avg <- mean(y)
+
+time1 <- system.time({
+    for (i in 1:n) {
+        diff_sq[i] <- (y[i] - y_avg)^2
+        sum_sq = sum_sq + diff_sq[i]
+    }
+})
+
+# Part B: calculate sum of squares with vector operations
+SS <- 0     # initialize
+
+time2 <- system.time({
+    SS <- t(y - y_avg) %*% (y - y_avg)
+})
+
+# Part C: for loop using dopar
+#SS1 <- 0
+
+#cluster1 <- makeCluster(2)
+registerDoParallel(cores = 1)
+
+time3 <- system.time({
+    SS1 <- foreach(i = 1:n, .combine = '+') %dopar%  {(y[i] - y_avg)^2}
+})
+
+stopImplicitCluster()
+
+#stopCluster(cluster1)
+
+# Part D: for loop using parSapply
+sum_fun <- function(y) {sum((y[i] - y_avg)^2)}
+
+cluster2 <- makeCluster(2); registerDoParallel(cluster2)
+clusterExport(cluster2, "sum_fun")
+time4 <- system.time({SS2 <- parSapply(cluster2, 1:n, function(y) sum_fun(y))
+    
+})
+stopCluster(cluster2)
+
+# Chart of final answers and times
+answers <- c(sum_sq, SS, SS1, SS2)
+elapsed <- c(time1[3], time2[3], time3[3], time4[3])
+system <- c(time1[2], time2[2], time3[2], time4[2])
+user <- c(time1[1], time2[1], time3[1], time4[1])
+compare_times <- cbind(answers, elapsed, system, user)
+colnames(compare_times) <- c("SST calculation", "Elapsed", "System", "User")
+knitr::kable(compare_times)
+```
+
+```{r Problem3_parallelize, echo = F, eval = T, include = T}
+# Problem 3: parallelize matrix
+
+# given data
+set.seed(1256)
+theta <- as.matrix(c(1, 2), nrow = 2) 
+X <- cbind(1, rep(1:10, 10))
+h <- X %*% theta + rnorm(100, 0, 0.2)
+
+# Process I used last homework
+first_theta <- matrix(0, nrow = 2)
+alpha = 0.01
+tol = 10e-05
+m <- length(h)
+
+for (i in 1:m) {
+while (abs(theta[2] - first_theta[2]) > tol && abs(theta[1] - first_theta[1]) > tol) {
+    
+    first_theta[1] <- theta[1] - (alpha * (1/m)) * sum(first_theta[1] + first_theta[2] * X[i,2] - h[i])
+    first_theta[2] <- theta[2] - (alpha * (1/m)) * sum((theta[1] + theta[2] * X[i,2] - h[i]) * X[i,2])
+    
+}}
+```
+
+```{r Probelm4_bootstrap, echo = F, eval = T, include = T}
+# Problem 4: random sample using boostrap method
+
+# Algorithm outline:
+# For 1:B, sample points Z^b
+# Calculate B^b estimates
+
+# given data
+n <- 200
+X <- 1/cbind(1, rt(n, df = 1), rt(n, df = 1), rt(n, df = 1))
+beta <- c(1, 2, 3, 0)
+Y <- X %*% beta + rnorm(100, sd = 3)
+
+# Bootstrap sample without parallelization
+B <- length(Y)
+q <- length(beta)
+beta_boot <- matrix(0, B, q)   # initialize matrix of zeros to hold sample
+index_boot <- matrix(0, B, 1)
+
+for (b in 1:B) {
+index_boot <- sample(1:B, B, replace = T)
+X_boot <- X[index_boot,]
+Y_boot <- Y[index_boot,]
+beta_boot <- coef(lm(Y_boot ~ X_boot))  # Now for beta estimates
+}
+
+# With parallelization
+# From the notes, %*% dopar seems most like a for loop
+sample_parallel <- function(i) {
+    index_b <- sample(1:B, B, replace = T)
+    X_b[i,] <- X[index_b[i],]
+    Y_b[i,] <- Y[index_b[i],]
+    beta_b[] <- 
+}
+
+cluster3 <- makeCluster(2)
+
+```
+
