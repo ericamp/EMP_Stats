@@ -17,9 +17,21 @@ library(foreach)
 library(doParallel)
 library(doRNG)
 library(doMC)
+library(stats)
 knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 60), tidy = T, message = F, warning = F)
 ```
 
+#Problem 1 
+I created a new repository with the name EMP_Stats under my username, ericamp.  The link to my new repository is https://github.com/ericamp/EMP_Stats
+
+#Problem 2: Sum of Squares
+The objective of this problem is to calculate sums of squares four different ways.
+\begin{enumerate}
+\item For loop: calculate sum of squares with the same natural process as the formula $S_{xx} = \sum_{i=1}^{n} (x_{i}-\bar{x})^{2} = \sum_{i=1}^{n} x_{i}^{2} - \frac{(\sum_{i=1}^{n} x_{i})^{2}}{n}$
+\item Vector operations: use the same process as the for loop, replacing exponentiation with the %*% operator, eliminating the need for indices to iterate on.
+\item Foreach: parallelize the sum of squares calculation with $\texttt{foreach}$; works very similarly to the for loop, but the $\texttt{foreach}$ command tabkes both $\texttt{.combine}$ and an index.
+\item parSapply: write a function and pass this to $\texttt{parSapply}$ to perform a set number of times without need for an index.
+\end{enumerate}
 ```{r Problem2_sum_squares, echo = F, eval = T, include = T}
 ## Problem 2: calculating sum of squares ##
 
@@ -84,6 +96,7 @@ colnames(compare_times) <- c("SST calculation", "Elapsed", "System", "User")
 knitr::kable(compare_times)
 ```
 
+#Problem 3: Gradient Descent
 ```{r Problem3_parallelize, echo = F, eval = T, include = T}
 # Problem 3: parallelize matrix
 
@@ -110,6 +123,7 @@ while (abs(theta[2] - first_theta[2]) > tol && abs(theta[1] - first_theta[1]) > 
 ```
 
 ```{r hopeless_attempt, echo - F, eval = T}
+
 set.seed(1256)
     theta <- as.matrix(c(1,2), nrow =2)
     X <- cbind(1, rep(1:10,10))
@@ -131,7 +145,11 @@ set.seed(1256)
     })
 ```
 
+
+#Problem 4: Boostrap
+Use $\texttt{foreach}$ to perform Boostrap on the given X and Y matrices and provide summary statistics for the resulting $\hat{\beta}^{(b)}$ values.
 ```{r Probelm4_bootstrap, echo = F, eval = T, include = T}
+
 # Problem 4: random sample using boostrap method
 
 # Algorithm outline:
@@ -144,20 +162,22 @@ X <- 1/cbind(1, rt(n, df = 1), rt(n, df = 1), rt(n, df = 1))
 beta <- c(1, 2, 3, 0)
 Y <- X %*% beta + rnorm(100, sd = 3)
 
-# Bootstrap sample without parallelization
+
 B <- 10000
 q <- length(beta)
-beta_boot <- matrix(0, nrow = B, ncol=q)   # initialize matrix of zeros to hold sample
-index_boot <- matrix(0, B, 1)
+beta_boot <- matrix(0, nrow = B, ncol = q)   # initialize matrix of zeros to hold sample
+index_boot <- matrix(0, nrow = n, 1)
 
-for (b in 1:B) {
-index_boot <- sample(1:n, n, replace = T)
-X_boot <- X[index_boot,]
-Y_boot <- Y[index_boot,]
-beta_boot <- coef(lm(Y_boot ~ X_boot))  # Now for beta estimates
+# Bootstrap sample without parallelization
+for(b in 1:B) {
+    index_boot <- sample(1:n, n, replace = T)
+    X_boot <- X[index_boot,]
+    Y_boot <- Y[index_boot]
+    beta_boot[b,] <- coef(lm(Y_boot ~ 0+X_boot))
 }
 
 
+set.seed(12345)
 n <- 200
 X <- 1/cbind(1, rt(n, df = 1), rt(n, df = 1), rt(n, df = 1))
 beta <- c(1, 2, 3, 0)
@@ -165,20 +185,40 @@ Y <- X %*% beta + rnorm(100, sd = 3)
 
 B <- 10000
 q <- length(beta)
-beta_boot <- matrix(0, nrow = B, ncol=q)   
-index_boot <- matrix(0, B, 1)
+
+# use rbind as the .combine
+# use doRNG in place of dopar
+
+beta_boot <- matrix(NA, nrow = 10000, ncol = 4)
+index_boot <- matrix(0, nrow = n, ncol = 1)
+boot_result <- list()
 
 c4 <- makeCluster(2)
 registerDoParallel(c4)
-#use cbind as the .combine
-# use doRNG in place of dopar
-foreach(i = 1:B, .combine = "cbind") %dorng% {
-    index_boot <- sample(1:n, n, replace = T)
+registerDoRNG()
+set.seed(1267)
+
+boot_result <- foreach(b = 1:10000, .combine = "rbind") %dorng% {
+    index_boot <- sample(1:n, n, replace = TRUE)
     X_boot <- X[index_boot,]
-    Y_boot <- Y[index_boot,]
-    beta_boot[b,] <- coef(lm(Y_boot ~ X_boot))
+    Y_boot <- Y[index_boot]
+    beta_boot <- coef(lm(Y_boot ~ 0 + X_boot))
+    return(beta_boot)
 }
 
 stopCluster(c4)
+as.data.frame(boot_result)
+
+knitr::kable(summary(beta_boot), caption = "Summary Statistics for Bootstrap Beta Results")
+par(mfrow = c(2,2))
+hist(as.data.frame(boot_result)$X_boot1, xlab = "", main = "Beta1")
+hist(as.data.frame(boot_result)$X_boot2, xlab = "", main = "Beta2")
+hist(as.data.frame(boot_result)$X_boot3, xlab = "", main = "Beta3")
+hist(as.data.frame(boot_result)$X_boot4, xlab = "", main = "Beta4")
+
+```
+
+#Appendix
+```{r Appendix, ref.label = knitr::all_labels(), echo = TRUE, eval = FALSE}
 ```
 
