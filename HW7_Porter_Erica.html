@@ -172,28 +172,28 @@ stopCluster(cluster2)</code></pre>
 <tr class="odd">
 <td align="left">for loop</td>
 <td align="left">100062.78244576</td>
-<td align="left">0.0170000000000001</td>
-<td align="left">0.001</td>
+<td align="left">0.0169999999999999</td>
+<td align="left">0</td>
 <td align="left">0.0170000000000001</td>
 </tr>
 <tr class="even">
 <td align="left">vector</td>
 <td align="left">100062.78244576</td>
 <td align="left">0.002</td>
-<td align="left">0</td>
-<td align="left">0.00099999999999989</td>
+<td align="left">0.001</td>
+<td align="left">0.002</td>
 </tr>
 <tr class="odd">
 <td align="left">foreach</td>
 <td align="left">100062.78244576</td>
-<td align="left">39.399</td>
-<td align="left">2.271</td>
-<td align="left">35.676</td>
+<td align="left">38.768</td>
+<td align="left">2.206</td>
+<td align="left">35.437</td>
 </tr>
 <tr class="even">
 <td align="left">parSapply</td>
 <td align="left">333328325183168</td>
-<td align="left">0.208999999999996</td>
+<td align="left">0.209000000000003</td>
 <td align="left">0.00700000000000012</td>
 <td align="left">0.0670000000000002</td>
 </tr>
@@ -232,20 +232,28 @@ foreach(a = 1:11, .combine = &quot;c&quot;) %dopar% {
 <pre><code>## NULL</code></pre>
 <pre class="r"><code>stopCluster(ca)
 
-# xseq &lt;- seq(0,1,0.1) result_grad &lt;- foreach(j = xseq,
-# .combine = 'c') %dopar% {
-for (i in 1:m) {
-    while (abs(theta[2] - first_theta[2]) &gt; tol &amp;&amp; abs(theta[1] - 
-        first_theta[1]) &gt; tol) {
-        
-        first_theta[1] &lt;- theta[1] - (alpha * (1/m)) * sum(first_theta[1] + 
-            first_theta[2] * X[i, 2] - h[i])
-        first_theta[2] &lt;- theta[2] - (alpha * (1/m)) * sum((theta[1] + 
-            theta[2] * X[i, 2] - h[i]) * X[i, 2])
-        
+# can also attempt to parallelize through different initial
+# theta values
+
+tseq &lt;- matrix(c(rep(0, 10), seq(0, 1, by = 0.1)), nrow = 2, 
+    ncol = 10, byrow = T)
+cb &lt;- makeCluster(2)
+registerDoParallel(cb)
+result_grad &lt;- foreach(j = 1:10, .combine = &quot;c&quot;) %dopar% {
+    first_theta[] &lt;- tseq[j]
+    for (i in 1:m) {
+        while (abs(theta[2] - first_theta[2]) &gt; tol &amp;&amp; abs(theta[1] - 
+            first_theta[1]) &gt; tol) {
+            
+            first_theta[1] &lt;- theta[1] - (alpha * (1/m)) * sum(first_theta[1] + 
+                first_theta[2] * X[i, 2] - h[i])
+            first_theta[2] &lt;- theta[2] - (alpha * (1/m)) * sum((theta[1] + 
+                theta[2] * X[i, 2] - h[i]) * X[i, 2])
+            
+        }
     }
 }
-# }</code></pre>
+stopCluster(cb)</code></pre>
 </div>
 <div id="problem-4-boostrap" class="section level1">
 <h1>Problem 4: Boostrap</h1>
@@ -343,32 +351,6 @@ library(doMC)
 library(stats)
 knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 60), tidy = T, 
     message = F, warning = F)
-# Part C: %dopar% calculation
-
-c1 &lt;- makeCluster(2)
-registerDoParallel(c1)
-time3 &lt;- system.time({
-    SS1 &lt;- foreach(i = 1:n, .combine = &quot;+&quot;) %dopar% {
-        (y[i] - y_avg)^2
-    }
-})
-
-stopCluster(c1)
-
-# Part D: parSapply calculation
-
-sum_fun &lt;- function(y) {
-    ((y - y_avg)^2)
-}
-
-cluster2 &lt;- makeCluster(2)
-registerDoParallel(cluster2)
-clusterExport(cluster2, c(&quot;sum_fun&quot;, &quot;y_avg&quot;))
-time4 &lt;- system.time({
-    SS2 &lt;- sum(parSapply(cluster2, 1:n, function(y) sum_fun(y)))
-    
-})
-stopCluster(cluster2)
 ## Problem 2: calculating sum of squares ##
 
 # generate data
@@ -400,9 +382,7 @@ SS &lt;- 0  # initialize
 time2 &lt;- system.time({
     SS &lt;- t(y - y_avg) %*% (y - y_avg)
 })
-
-# Part C: parallelize sum of squares using %dopar% (record
-# time)
+# Part C: %dopar% calculation
 
 c1 &lt;- makeCluster(2)
 registerDoParallel(c1)
@@ -414,9 +394,7 @@ time3 &lt;- system.time({
 
 stopCluster(c1)
 
-
-# Part D: parallel sum of squares using parSapply instead
-# (record time)
+# Part D: parSapply calculation
 
 sum_fun &lt;- function(y) {
     ((y - y_avg)^2)
@@ -430,8 +408,6 @@ time4 &lt;- system.time({
     
 })
 stopCluster(cluster2)
-
-
 # Chart of final answers and times
 answers &lt;- c(sum_sq, SS, SS1, SS2)
 elapsed &lt;- as.vector(c(time1[3], time2[3], time3[3], time4[3]))
@@ -475,20 +451,28 @@ foreach(a = 1:11, .combine = &quot;c&quot;) %dopar% {
 }
 stopCluster(ca)
 
-# xseq &lt;- seq(0,1,0.1) result_grad &lt;- foreach(j = xseq,
-# .combine = 'c') %dopar% {
-for (i in 1:m) {
-    while (abs(theta[2] - first_theta[2]) &gt; tol &amp;&amp; abs(theta[1] - 
-        first_theta[1]) &gt; tol) {
-        
-        first_theta[1] &lt;- theta[1] - (alpha * (1/m)) * sum(first_theta[1] + 
-            first_theta[2] * X[i, 2] - h[i])
-        first_theta[2] &lt;- theta[2] - (alpha * (1/m)) * sum((theta[1] + 
-            theta[2] * X[i, 2] - h[i]) * X[i, 2])
-        
+# can also attempt to parallelize through different initial
+# theta values
+
+tseq &lt;- matrix(c(rep(0, 10), seq(0, 1, by = 0.1)), nrow = 2, 
+    ncol = 10, byrow = T)
+cb &lt;- makeCluster(2)
+registerDoParallel(cb)
+result_grad &lt;- foreach(j = 1:10, .combine = &quot;c&quot;) %dopar% {
+    first_theta[] &lt;- tseq[j]
+    for (i in 1:m) {
+        while (abs(theta[2] - first_theta[2]) &gt; tol &amp;&amp; abs(theta[1] - 
+            first_theta[1]) &gt; tol) {
+            
+            first_theta[1] &lt;- theta[1] - (alpha * (1/m)) * sum(first_theta[1] + 
+                first_theta[2] * X[i, 2] - h[i])
+            first_theta[2] &lt;- theta[2] - (alpha * (1/m)) * sum((theta[1] + 
+                theta[2] * X[i, 2] - h[i]) * X[i, 2])
+            
+        }
     }
 }
-# }
+stopCluster(cb)
 
 set.seed(1256)
 theta &lt;- as.matrix(c(1, 2), nrow = 2)

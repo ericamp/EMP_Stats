@@ -37,27 +37,7 @@ Foreach: parallelize the sum of squares calculation with $\texttt{foreach}$; wor
 parSapply: write a function and pass this to $\texttt{parSapply}$ to perform a set number of times without need for an index.
 
 Below are the parallelized sum of squares operations that were not included/requested in HW6.
-```{r, echo = T, eval = F, include = T}
-# Part C: %dopar% calculation
 
-c1 <- makeCluster(2); registerDoParallel(c1)
-time3 <- system.time({
-    SS1 <- foreach(i = 1:n, .combine = "+") %dopar%  {(y[i] - y_avg)^2}
-})
-
-stopCluster(c1)
-
-# Part D: parSapply calculation
-
-sum_fun <- function(y) {((y - y_avg)^2)}
-
-cluster2 <- makeCluster(2); registerDoParallel(cluster2)
-clusterExport(cluster2, c("sum_fun", "y_avg"))
-time4 <- system.time({SS2 <- sum(parSapply(cluster2, 1:n, function(y) sum_fun(y)))
-    
-})
-stopCluster(cluster2)
-```
 
 ```{r Problem2_sum_squares, echo = F, eval = T, include = T}
 ## Problem 2: calculating sum of squares ##
@@ -89,19 +69,19 @@ SS <- 0     # initialize
 time2 <- system.time({
     SS <- t(y - y_avg) %*% (y - y_avg)
 })
+```
 
-# Part C: parallelize sum of squares using %dopar% (record time)
+```{r, echo = T, eval = T, include = T}
+# Part C: %dopar% calculation
 
-c1 <- makeCluster(2)  
-registerDoParallel(c1)
+c1 <- makeCluster(2); registerDoParallel(c1)
 time3 <- system.time({
     SS1 <- foreach(i = 1:n, .combine = "+") %dopar%  {(y[i] - y_avg)^2}
 })
 
 stopCluster(c1)
 
-
-# Part D: parallel sum of squares using parSapply instead (record time)
+# Part D: parSapply calculation
 
 sum_fun <- function(y) {((y - y_avg)^2)}
 
@@ -111,8 +91,9 @@ time4 <- system.time({SS2 <- sum(parSapply(cluster2, 1:n, function(y) sum_fun(y)
     
 })
 stopCluster(cluster2)
+```
 
-
+```{r chart, echo = F, eval = T}
 # Chart of final answers and times
 answers <- c(sum_sq, SS, SS1, SS2)
 elapsed <- as.vector(c(time1[3], time2[3], time3[3], time4[3]))
@@ -162,8 +143,13 @@ while (abs(theta[2] - first_theta[2]) > tol && abs(theta[1] - first_theta[1]) > 
 }
 stopCluster(ca)
 
-#xseq <- seq(0,1,0.1)
-#result_grad <- foreach(j = xseq, .combine = "c") %dopar% {
+# can also attempt to parallelize through different initial theta values
+
+tseq <- matrix(c(rep(0, 10), seq(0, 1, by = 0.1)), nrow = 2, ncol = 10, byrow = T)
+cb <- makeCluster(2)  
+registerDoParallel(cb)
+result_grad <- foreach(j = 1:10, .combine = "c") %dopar% {
+first_theta[] <- tseq[j]    
 for (i in 1:m) {
 while (abs(theta[2] - first_theta[2]) > tol && abs(theta[1] - first_theta[1]) > tol) {
     
@@ -171,7 +157,8 @@ while (abs(theta[2] - first_theta[2]) > tol && abs(theta[1] - first_theta[1]) > 
     first_theta[2] <- theta[2] - (alpha * (1/m)) * sum((theta[1] + theta[2] * X[i,2] - h[i]) * X[i,2])
     
 }}
-#}
+}
+stopCluster(cb)
 ```
 
 ```{r hopeless_attempt, echo = F, eval = T}
