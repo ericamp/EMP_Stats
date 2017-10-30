@@ -1,0 +1,104 @@
+---
+title: "HW8_Porter_Erica"
+output:
+  html_document: default
+  html_notebook: default
+---
+```{r setup, include = F}
+library(tidyr, quietly = T, warn.conflicts = F)
+library(dplyr, quietly = T, warn.conflicts = F)
+library(stringr, quietly = T,warn.conflicts = F)
+library(tidytext)
+library(tidyselect)
+library(tidyverse)
+library(tm)
+library(ggplot2)  
+library(RColorBrewer)
+library(wordcloud)
+library(data.table)
+library(lettercase)
+```
+
+
+#Problem 1
+I have a new repository with the name EMP_Stats under my username, ericamp.  The link to my new repository is https://github.com/ericamp/EMP_Stats
+
+
+#Problem 2
+Load munge and create a story for the class dataset: survey_data.txt.  The file survey_data.txt contains columns of information originally written by hand by each of us in the course on the first day of class.  Therefore, the responses vary significantly in format, content, and length.  
+
+* Goal: use tidy concepts
+
+    + Each variable is a column
+    + Each observation is a row
+    + Each type of observational unit is a table
+
+```{r text_story, echo = F, eval = T}
+
+url <- "https://raw.githubusercontent.com/rsettlage/STAT_5014/master/08_text_mining_Rnotebooks_bash_sed_awk/survey_data.txt"
+
+cname <- file.path("~", "Desktop", "texts")
+cname
+dir(cname)
+
+docs <- VCorpus(DirSource(cname))   
+summary(docs)
+inspect(docs[1])
+writeLines(as.character(docs[1]))
+#docs <- tm_map(docs,removePunctuation)
+
+dtm <- DocumentTermMatrix(docs)
+inspect(dtm)
+
+tdm <- TermDocumentMatrix(docs)
+tdm
+
+freq <- colSums(as.matrix(dtm))   
+length(freq)
+
+ord <- order(freq)
+
+dtms <- removeSparseTerms(dtm, 0.2)  # remove sparse stuff
+
+head(table(freq), 20)
+
+freq <- colSums(as.matrix(dtms))
+freq
+
+freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)   
+head(freq, 14)
+
+findFreqTerms(dtm, lowfreq = 3)
+
+wf <- data.frame(word=names(freq), freq=freq)   
+head(wf)
+
+
+p <- ggplot(subset(wf, freq>3), aes(x = reorder(word, -freq), y = freq)) +
+          geom_bar(stat = "identity") + 
+          theme(axis.text.x = element_text(angle=45, hjust=1))
+
+set.seed(142)   
+wordcloud(names(freq), freq, min.freq=2)
+wordcloud(names(freq), freq, min.freq=2, scale=c(4, .1), colors=brewer.pal(6, "Dark2"))   
+
+
+text1 <- readLines("https://raw.githubusercontent.com/rsettlage/STAT_5014/master/08_text_mining_Rnotebooks_bash_sed_awk/survey_data.txt")
+docs <- Corpus(VectorSource(text1))
+inspect(docs)
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
+
+text2 <- read.table("~/Desktop/texts/survey_data.txt", header = T, sep = "\t")
+text2[] <- lapply(text2, tolower)
+
+
+```
+
+
+#Problem 3
+
+
+
+#Problem 4
+I created an account at arc.vt.edu.  I just need to figure out how to use SSH to check that it works...
