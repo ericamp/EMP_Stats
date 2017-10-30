@@ -36,6 +36,29 @@ Foreach: parallelize the sum of squares calculation with $\texttt{foreach}$; wor
 
 parSapply: write a function and pass this to $\texttt{parSapply}$ to perform a set number of times without need for an index.
 
+Below are the parallelized sum of squares operations that were not included/requested in HW6.
+```{r, echo = T, eval = F, include = T}
+# Part C: %dopar% calculation
+
+c1 <- makeCluster(2); registerDoParallel(c1)
+time3 <- system.time({
+    SS1 <- foreach(i = 1:n, .combine = "+") %dopar%  {(y[i] - y_avg)^2}
+})
+
+stopCluster(c1)
+
+# Part D: parSapply calculation
+
+sum_fun <- function(y) {((y - y_avg)^2)}
+
+cluster2 <- makeCluster(2); registerDoParallel(cluster2)
+clusterExport(cluster2, c("sum_fun", "y_avg"))
+time4 <- system.time({SS2 <- sum(parSapply(cluster2, 1:n, function(y) sum_fun(y)))
+    
+})
+stopCluster(cluster2)
+```
+
 ```{r Problem2_sum_squares, echo = F, eval = T, include = T}
 ## Problem 2: calculating sum of squares ##
 
@@ -92,31 +115,55 @@ stopCluster(cluster2)
 
 # Chart of final answers and times
 answers <- c(sum_sq, SS, SS1, SS2)
-elapsed <- c(time1[3], time2[3], time3[3], time4[3])
-system <- c(time1[2], time2[2], time3[2], time4[2])
-user <- c(time1[1], time2[1], time3[1], time4[1])
-compare_times <- cbind(answers, elapsed, system, user)
-colnames(compare_times) <- c("SST calculation", "Elapsed", "System", "User")
+elapsed <- as.vector(c(time1[3], time2[3], time3[3], time4[3]))
+system <- as.vector(c(time1[2], time2[2], time3[2], time4[2]))
+user <- as.vector(c(time1[1], time2[1], time3[1], time4[1]))
+label <- c("for loop","vector","foreach","parSapply")
+compare_times <- cbind(label,answers, elapsed, system, user)
+colnames(compare_times) <- c("Method", "SST calculation", "Elapsed", "System", "User")
 knitr::kable(compare_times)
 ```
 
 #Problem 3: Gradient Descent
-```{r Problem3_parallelize, echo = F, eval = T, include = T}
-# Problem 3: parallelize matrix
 
+The inputs that we define/intitialize are tolerance, alpha, and the initial $\Theta$ matrix, so it seems best to parallelize based upon one of these values (e.g. different possible $\alpha$'s, different possible $\Theta$'s).
+
+
+```{r, Prob3, echo = F, eval = T}
 # given data
 set.seed(1256)
 theta <- as.matrix(c(1, 2), nrow = 2) 
 X <- cbind(1, rep(1:10, 10))
 h <- X %*% theta + rnorm(100, 0, 0.2)
+```
 
-# We could potentially parallelize the objects that we define (e.g. alpha, tolerance, initial theta matrix)
-# Process I used last homework
+```{r Problem3_parallelize, echo = T, eval = T, include = T}
+# Problem 3: parallelize matrix
+
+# Wrapping around process I used last homework
 first_theta <- matrix(0, nrow = 2)
 alpha = 0.01
-tol = 10e-05
+tol = 10e-03
 m <- length(h)
 
+# changing alpha seems easier, although potentially unhelpful
+ca <- makeCluster(2)  
+registerDoParallel(ca)
+alpha_vec <- seq(0, 0.1, 0.01)
+foreach(a = 1:11, .combine = "c") %dopar% {
+    alpha <- alpha_vec[a]
+for (i in 1:m) {
+while (abs(theta[2] - first_theta[2]) > tol && abs(theta[1] - first_theta[1]) > tol) {
+    
+    first_theta[1] <- theta[1] - (alpha * (1/m)) * sum(first_theta[1] + first_theta[2] * X[i,2] - h[i])
+    first_theta[2] <- theta[2] - (alpha * (1/m)) * sum((theta[1] + theta[2] * X[i,2] - h[i]) * X[i,2])
+
+    }}
+}
+stopCluster(ca)
+
+#xseq <- seq(0,1,0.1)
+#result_grad <- foreach(j = xseq, .combine = "c") %dopar% {
 for (i in 1:m) {
 while (abs(theta[2] - first_theta[2]) > tol && abs(theta[1] - first_theta[1]) > tol) {
     
@@ -124,6 +171,7 @@ while (abs(theta[2] - first_theta[2]) > tol && abs(theta[1] - first_theta[1]) > 
     first_theta[2] <- theta[2] - (alpha * (1/m)) * sum((theta[1] + theta[2] * X[i,2] - h[i]) * X[i,2])
     
 }}
+#}
 ```
 
 ```{r hopeless_attempt, echo = F, eval = T}
@@ -152,6 +200,29 @@ set.seed(1256)
 
 #Problem 4: Boostrap
 Use $\texttt{foreach}$ to perform Boostrap on the given X and Y matrices and provide summary statistics for the resulting $\hat{\beta}^{(b)}$ values.
+
+After inputing the given data, I did the following with $\texttt{foreach}$ and $\texttt{%dorng%}$.
+```{r, echo = T, eval = F, include = T}
+beta_boot <- matrix(NA, nrow = 10000, ncol = 4)
+index_boot <- matrix(0, nrow = n, ncol = 1)
+boot_result <- list()
+
+c4 <- makeCluster(2)
+registerDoParallel(c4)
+registerDoRNG()
+set.seed(1267)
+
+boot_result <- foreach(b = 1:10000, .combine = "rbind") %dorng% {
+    index_boot <- sample(1:n, n, replace = TRUE)
+    X_boot <- X[index_boot,]
+    Y_boot <- Y[index_boot]
+    beta_boot <- coef(lm(Y_boot ~ 0 + X_boot))
+    return(beta_boot)
+}
+
+stopCluster(c4)
+```
+
 ```{r Probelm4_bootstrap, echo = F, eval = T, include = T}
 
 # Problem 4: random sample using boostrap method
@@ -195,6 +266,7 @@ hist(as.data.frame(boot_result)$X_boot3, xlab = "", main = "Beta3")
 hist(as.data.frame(boot_result)$X_boot4, xlab = "", main = "Beta4")
 
 ```
+\newpage
 
 #Appendix
 ```{r Appendix, ref.label = knitr::all_labels(), echo = TRUE, eval = FALSE}
