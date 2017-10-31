@@ -3,6 +3,7 @@ title: "HW8_Porter_Erica"
 output:
   html_document: default
   html_notebook: default
+  pdf_document: default
 ---
 ```{r setup, include = F}
 library(tidyr, quietly = T, warn.conflicts = F)
@@ -32,66 +33,48 @@ Load munge and create a story for the class dataset: survey_data.txt.  The file 
     + Each variable is a column
     + Each observation is a row
     + Each type of observational unit is a table
-
-```{r text_story, echo = F, eval = T}
-
-url <- "https://raw.githubusercontent.com/rsettlage/STAT_5014/master/08_text_mining_Rnotebooks_bash_sed_awk/survey_data.txt"
-
-cname <- file.path("~", "Desktop", "texts")
-cname
-dir(cname)
-
-docs <- VCorpus(DirSource(cname))   
-summary(docs)
-inspect(docs[1])
-writeLines(as.character(docs[1]))
-#docs <- tm_map(docs,removePunctuation)
-
-dtm <- DocumentTermMatrix(docs)
-inspect(dtm)
-
-tdm <- TermDocumentMatrix(docs)
-tdm
-
-freq <- colSums(as.matrix(dtm))   
-length(freq)
-
-ord <- order(freq)
-
-dtms <- removeSparseTerms(dtm, 0.2)  # remove sparse stuff
-
-head(table(freq), 20)
-
-freq <- colSums(as.matrix(dtms))
-freq
-
-freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)   
-head(freq, 14)
-
-findFreqTerms(dtm, lowfreq = 3)
-
-wf <- data.frame(word=names(freq), freq=freq)   
-head(wf)
+    
+Here I decided to inspect and analyze/plot aspects of the last column in the data, "Other Programming," since it seems to contain the largest amount of unique words and information.  However, the following process (and more) could be performed on the entire data set.  I first read the survey_data.txt file into a data frame using $\texttt{read.table}$ and removed uppercase letters with $\texttt{tolower}$ to make analysis easier.  Next, I used several $\texttt{gsub}$ statements to remove punctuation and instances of two or more spaces.  Finally, I used $\texttt{strsplit}$ to separate the words in each row and $\texttt{unlist}$ to turn the list into a vector.  It certainly wasn't the most elegant way to go about things, but it allowed me to then create a word cloud and barplot of the most commonly occuring words in the "Other Programming" column.  The word cloud would be more appealing for a larger data set with more words to include, but this one certainly demonstrates the general visual and possible execution.  I have included the portions of code below that were used to read in the initial data and create the graphics.  I've also included a short table of the 6 words/programming languages that appear most frequently in the data set.
 
 
-p <- ggplot(subset(wf, freq>3), aes(x = reorder(word, -freq), y = freq)) +
-          geom_bar(stat = "identity") + 
-          theme(axis.text.x = element_text(angle=45, hjust=1))
+```{r text1, echo = T, eval = T}
+# read in the data and remove all uppercase
 
-set.seed(142)   
-wordcloud(names(freq), freq, min.freq=2)
-wordcloud(names(freq), freq, min.freq=2, scale=c(4, .1), colors=brewer.pal(6, "Dark2"))   
+text <- read.table("~/Desktop/texts/survey_data.txt", header = T, sep = "\t")
+text[] <- lapply(text, tolower)
+
+```
 
 
-text1 <- readLines("https://raw.githubusercontent.com/rsettlage/STAT_5014/master/08_text_mining_Rnotebooks_bash_sed_awk/survey_data.txt")
-docs <- Corpus(VectorSource(text1))
-inspect(docs)
-toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
-docs <- tm_map(docs, toSpace, "/")
+```{r text2, echo = F, eval = T}
+# use gsub to remove punctuation and extra spaces
 
-text2 <- read.table("~/Desktop/texts/survey_data.txt", header = T, sep = "\t")
-text2[] <- lapply(text2, tolower)
+text[]$Other.programming <- gsub(",", " ", text[]$Other.programming)
+text[]$Other.programming <- gsub("  ", " ", text[]$Other.programming)
+text[]$Other.programming <- gsub("/", " ", text[]$Other.programming)
+text[]$Other.programming <- gsub("-", " ", text[]$Other.programming)
+text[]$Other.programming <- gsub("\\(", " ", text[]$Other.programming)
+text[]$Other.programming <- gsub("\\)", " ", text[]$Other.programming)
+text[]$Other.programming <- gsub("  ", " ", text[]$Other.programming)
 
+# split strings into individual words to analyze
+
+text[]$Other.programming <- strsplit(text[]$Other.programming, " ")
+
+# table of frequent words
+
+word_list <- unlist(text[]$Other.programming)
+words <- as.data.frame((table(word_list)))
+words <- words[order(-words$Freq),]
+knitr::kable(head(words), caption = "Common Responses to Other Programming Experience")
+
+```
+
+```{r text3, echo = T, eval = T}
+
+wordcloud(word = word_list, min.freq = 2, scale=c(7, 0.6), colors=brewer.pal(6, "Dark2"))
+
+barplot(words[1:6,]$Freq, names.arg = words[1:6,]$word_list, horiz = T, las = 1, density = 45, angle = 11, col = "cornflowerblue", main = "Other Programming Experience", xlab = "Counts")
 
 ```
 
@@ -101,4 +84,11 @@ text2[] <- lapply(text2, tolower)
 
 
 #Problem 4
-I created an account at arc.vt.edu.  I just need to figure out how to use SSH to check that it works...
+I created an account at arc.vt.edu and I tested my login through SSH; the account is under my PID, $\textbf{ericamp}$.
+
+
+\newpage
+
+#Appendix
+
+```{r Appendix, ref.label = c("text1", "text2", "text3"), eval = F}

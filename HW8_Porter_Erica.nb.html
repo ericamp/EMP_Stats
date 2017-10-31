@@ -189,29 +189,31 @@ $(document).ready(function () {
 <li>Each type of observational unit is a table</li>
 </ul></li>
 </ul>
+<p>Here I decided to inspect and analyze/plot aspects of the last column in the data, “Other Programming,” since it seems to contain the largest amount of unique words and information. However, the following process (and more) could be performed on the entire data set. I first read the survey_data.txt file into a data frame using <span class="math inline">\(\texttt{read.table}\)</span> and removed uppercase letters with <span class="math inline">\(\texttt{tolower}\)</span> to make analysis easier. Next, I used several <span class="math inline">\(\texttt{gsub}\)</span> statements to remove punctuation and instances of two or more spaces. Finally, I used <span class="math inline">\(\texttt{strsplit}\)</span> to separate the words in each row and <span class="math inline">\(\texttt{unlist}\)</span> to turn the list into a vector. It certainly wasn’t the most elegant way to go about things, but it allowed me to then create a word cloud and barplot of the most commonly occuring words in the “Other Programming” column. The word cloud would be more appealing for a larger data set with more words to include, but this one certainly demonstrates the general visual and possible execution. I have included the portions of code below that were used to read in the initial data and create the graphics. I’ve also included a short table of the 6 words/programming languages that appear most frequently in the data set.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-output-begin eyJkYXRhIjoiPDxTaW1wbGVDb3JwdXM+PlxuTWV0YWRhdGE6ICBjb3JwdXMgc3BlY2lmaWM6IDEsIGRvY3VtZW50IGxldmVsIChpbmRleGVkKTogMFxuQ29udGVudDogIGRvY3VtZW50czogMTVcblxuIFsxXSBNYWpvclxcdFBsYXRmb3JtXFx0UiBsZXZlbFxcdE90aGVyIHByb2dyYW1taW5nICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gWzJdIE1hdGgtQlNcXHRQQ1xcdGJlZ2lubmVyXFx0bm9uZSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiBbM10gTWF0aC1CU1xcdE1hY1xcdGJlZ2lubmVyXFx0bm9uZSAoanVzdCBzb21lIFNBUyBhbmQgTUFUTEFCKSAgICAgICAgICAgICAgICAgICAgIFxuIFs0XSBcIkZpbmFuY2UtQlMsIEZpbmFuY2UtTVNcIlxcdFBDXFx0SW50XFx0XCJNYXRsYWIsIFNBUywgc29tZSBTUUxcIiAgICAgICAgICAgICAgICAgIFxuIFs1XSBNYXRoKFN0YXQpLUJTXFx0UENcXHRpbnRlcm1lZGlhdGVcXHRcIm1pbml0YWIsU0FTLFB5dGhvblwiICAgICAgICAgICAgICAgICAgICAgICBcbiBbNl0gTWF0aChTdGF0KS1CU1xcdFBDXFx0SW50ZXJtZWRpYXRlXFx0XCJNaW5pdGFiLFNBUyxQeXRob24sU1FMLEMrKyxSLFNQU1NcIiAgICAgICAgXG4gWzddIFwiTWF0aCwgSGlzdG9yeVwiXFx0UEMtU3VyZmFjZVxcdGJlZ2lubmVyXFx0T2JqLUMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuIFs4XSBNYXRoXFx0UENcXHRiZWdpbm5lclxcdG5vbmUgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gWzldIFwiRWNvbiwgTWF0aFwiXFx0UENcXHRiZWdpbm5lclxcdEphdmEgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuWzEwXSBFY29uL1N0YXRcXHRNYWNcXHRpbnRlcm1lZGlhdGVcXHRcIlB5dGhvbixTQVNcIiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcblsxMV0gRWNvbi9NYXRoL1NUQVRcXHRQQ1xcdEludGVybWVkaWF0ZVxcdE5PTkUgKHRlZW55IGFtb3VudCBvZiBTQVMpICAgICAgICAgICAgICAgIFxuWzEyXSBEQUFTXFx0UENcXHRiZWcvaW50ZXJtZWRcXHRzb21lIFNBUyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5bMTNdIEZpbmFuY2UgRW5naW5lZXIgQlMgU1RBVC1NYXN0ZXJcXHRNQUNcXHRJbnRlcm1lZFxcdHB5dGhvbi9tYXRsYWIvamF2YS9MaW51eC9DKytcblsxNF0gbWVjaGFuaWNhbCBFbmdcXHRQQ1xcdGJlZy9pbnRlcm1lZGlhdGVcXHRtYXRsYWIvamF2YS9DKysgICAgICAgICAgICAgICAgICAgICAgIFxuWzE1XSBNYXRoL1N0YXRcXHRQQ1xcdGludCBcXHRNYXRsYWIvSmF2YS9TQVMvcHl0aG9uICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4ifQ== -->
-<pre><code>&lt;&lt;SimpleCorpus&gt;&gt;
-Metadata:  corpus specific: 1, document level (indexed): 0
-Content:  documents: 15
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyByZWFkIGluIHRoZSBkYXRhIGFuZCByZW1vdmUgYWxsIHVwcGVyY2FzZVxuXG50ZXh0IDwtIHJlYWQudGFibGUoXCJ+L0Rlc2t0b3AvdGV4dHMvc3VydmV5X2RhdGEudHh0XCIsIGhlYWRlciA9IFQsIHNlcCA9IFwiXFx0XCIpXG50ZXh0W10gPC0gbGFwcGx5KHRleHQsIHRvbG93ZXIpXG5cbmBgYCJ9 -->
+<pre class="r"><code># read in the data and remove all uppercase
 
- [1] Major\tPlatform\tR level\tOther programming                                 
- [2] Math-BS\tPC\tbeginner\tnone                                                 
- [3] Math-BS\tMac\tbeginner\tnone (just some SAS and MATLAB)                     
- [4] &quot;Finance-BS, Finance-MS&quot;\tPC\tInt\t&quot;Matlab, SAS, some SQL&quot;                  
- [5] Math(Stat)-BS\tPC\tintermediate\t&quot;minitab,SAS,Python&quot;                       
- [6] Math(Stat)-BS\tPC\tIntermediate\t&quot;Minitab,SAS,Python,SQL,C++,R,SPSS&quot;        
- [7] &quot;Math, History&quot;\tPC-Surface\tbeginner\tObj-C                                
- [8] Math\tPC\tbeginner\tnone                                                    
- [9] &quot;Econ, Math&quot;\tPC\tbeginner\tJava                                            
-[10] Econ/Stat\tMac\tintermediate\t&quot;Python,SAS&quot;                                  
-[11] Econ/Math/STAT\tPC\tIntermediate\tNONE (teeny amount of SAS)                
-[12] DAAS\tPC\tbeg/intermed\tsome SAS                                            
-[13] Finance Engineer BS STAT-Master\tMAC\tIntermed\tpython/matlab/java/Linux/C++
-[14] mechanical Eng\tPC\tbeg/intermediate\tmatlab/java/C++                       
-[15] Math/Stat\tPC\tint \tMatlab/Java/SAS/python                                 </code></pre>
-<!-- rnb-output-end -->
+text &lt;- read.table(&quot;~/Desktop/texts/survey_data.txt&quot;, header = T, sep = &quot;\t&quot;)
+text[] &lt;- lapply(text, tolower)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG53b3JkY2xvdWQod29yZCA9IHdvcmRfbGlzdCwgbWluLmZyZXEgPSAyLCBzY2FsZT1jKDcsIDAuNiksIGNvbG9ycz1icmV3ZXIucGFsKDYsIFwiRGFyazJcIikpXG5cbmJhcnBsb3Qod29yZHNbMTo2LF0kRnJlcSwgbmFtZXMuYXJnID0gd29yZHNbMTo2LF0kd29yZF9saXN0LCBob3JpeiA9IFQsIGxhcyA9IDEsIGRlbnNpdHkgPSA0NSwgYW5nbGUgPSAxMSwgY29sID0gXCJjb3JuZmxvd2VyYmx1ZVwiLCBtYWluID0gXCJPdGhlciBQcm9ncmFtbWluZyBFeHBlcmllbmNlXCIsIHhsYWIgPSBcIkNvdW50c1wiKVxuXG5gYGAifQ== -->
+<pre class="r"><code>
+wordcloud(word = word_list, min.freq = 2, scale=c(7, 0.6), colors=brewer.pal(6, &quot;Dark2&quot;))
+
+barplot(words[1:6,]$Freq, names.arg = words[1:6,]$word_list, horiz = T, las = 1, density = 45, angle = 11, col = &quot;cornflowerblue&quot;, main = &quot;Other Programming Experience&quot;, xlab = &quot;Counts&quot;)
+</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -220,11 +222,49 @@ Content:  documents: 15
 </div>
 <div id="problem-4" class="section level1">
 <h1>Problem 4</h1>
-<p>I created an account at arc.vt.edu. I just need to figure out how to use SSH to check that it works…</p>
+<p>I created an account at arc.vt.edu and I tested my login through SSH; the account is under my PID, <span class="math inline">\(\textbf{ericamp}\)</span>.</p>
+
+</div>
+<div id="appendix" class="section level1">
+<h1>Appendix</h1>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiMgcmVhZCBpbiB0aGUgZGF0YSBhbmQgcmVtb3ZlIGFsbCB1cHBlcmNhc2UiLCIiLCJ0ZXh0IDwtIHJlYWQudGFibGUoXCJ+L0Rlc2t0b3AvdGV4dHMvc3VydmV5X2RhdGEudHh0XCIsIGhlYWRlciA9IFQsIHNlcCA9IFwiXFx0XCIpIiwidGV4dFtdIDwtIGxhcHBseSh0ZXh0LCB0b2xvd2VyKSIsIiIsIiMgdXNlIGdzdWIgdG8gcmVtb3ZlIHB1bmN0dWF0aW9uIGFuZCBleHRyYSBzcGFjZXMiLCIiLCJ0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcgPC0gZ3N1YihcIixcIiwgXCIgXCIsIHRleHRbXSRPdGhlci5wcm9ncmFtbWluZykiLCJ0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcgPC0gZ3N1YihcIiAgXCIsIFwiIFwiLCB0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcpIiwidGV4dFtdJE90aGVyLnByb2dyYW1taW5nIDwtIGdzdWIoXCIvXCIsIFwiIFwiLCB0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcpIiwidGV4dFtdJE90aGVyLnByb2dyYW1taW5nIDwtIGdzdWIoXCItXCIsIFwiIFwiLCB0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcpIiwidGV4dFtdJE90aGVyLnByb2dyYW1taW5nIDwtIGdzdWIoXCJcXFxcKFwiLCBcIiBcIiwgdGV4dFtdJE90aGVyLnByb2dyYW1taW5nKSIsInRleHRbXSRPdGhlci5wcm9ncmFtbWluZyA8LSBnc3ViKFwiXFxcXClcIiwgXCIgXCIsIHRleHRbXSRPdGhlci5wcm9ncmFtbWluZykiLCJ0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcgPC0gZ3N1YihcIiAgXCIsIFwiIFwiLCB0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcpIiwiIiwiIyBzcGxpdCBzdHJpbmdzIGludG8gaW5kaXZpZHVhbCB3b3JkcyB0byBhbmFseXplIiwiIiwidGV4dFtdJE90aGVyLnByb2dyYW1taW5nIDwtIHN0cnNwbGl0KHRleHRbXSRPdGhlci5wcm9ncmFtbWluZywgXCIgXCIpIiwiIiwiIyB0YWJsZSBvZiBmcmVxdWVudCB3b3JkcyIsIiIsIndvcmRfbGlzdCA8LSB1bmxpc3QodGV4dFtdJE90aGVyLnByb2dyYW1taW5nKSIsIndvcmRzIDwtIGFzLmRhdGEuZnJhbWUoKHRhYmxlKHdvcmRfbGlzdCkpKSIsIndvcmRzIDwtIHdvcmRzW29yZGVyKC13b3JkcyRGcmVxKSxdIiwia25pdHI6OmthYmxlKGhlYWQod29yZHMpLCBjYXB0aW9uID0gXCJDb21tb24gUmVzcG9uc2VzIHRvIE90aGVyIFByb2dyYW1taW5nIEV4cGVyaWVuY2VcIikiLCIiLCIiLCJ3b3JkY2xvdWQod29yZCA9IHdvcmRfbGlzdCwgbWluLmZyZXEgPSAyLCBzY2FsZT1jKDcsIDAuNiksIGNvbG9ycz1icmV3ZXIucGFsKDYsIFwiRGFyazJcIikpIiwiIiwiYmFycGxvdCh3b3Jkc1sxOjYsXSRGcmVxLCBuYW1lcy5hcmcgPSB3b3Jkc1sxOjYsXSR3b3JkX2xpc3QsIGhvcml6ID0gVCwgbGFzID0gMSwgZGVuc2l0eSA9IDQ1LCBhbmdsZSA9IDExLCBjb2wgPSBcImNvcm5mbG93ZXJibHVlXCIsIG1haW4gPSBcIk90aGVyIFByb2dyYW1taW5nIEV4cGVyaWVuY2VcIiwgeGxhYiA9IFwiQ291bnRzXCIpIl19 -->
+<pre class="r"><code># read in the data and remove all uppercase
+
+text &lt;- read.table(&quot;~/Desktop/texts/survey_data.txt&quot;, header = T, sep = &quot;\t&quot;)
+text[] &lt;- lapply(text, tolower)
+
+# use gsub to remove punctuation and extra spaces
+
+text[]$Other.programming &lt;- gsub(&quot;,&quot;, &quot; &quot;, text[]$Other.programming)
+text[]$Other.programming &lt;- gsub(&quot;  &quot;, &quot; &quot;, text[]$Other.programming)
+text[]$Other.programming &lt;- gsub(&quot;/&quot;, &quot; &quot;, text[]$Other.programming)
+text[]$Other.programming &lt;- gsub(&quot;-&quot;, &quot; &quot;, text[]$Other.programming)
+text[]$Other.programming &lt;- gsub(&quot;\\(&quot;, &quot; &quot;, text[]$Other.programming)
+text[]$Other.programming &lt;- gsub(&quot;\\)&quot;, &quot; &quot;, text[]$Other.programming)
+text[]$Other.programming &lt;- gsub(&quot;  &quot;, &quot; &quot;, text[]$Other.programming)
+
+# split strings into individual words to analyze
+
+text[]$Other.programming &lt;- strsplit(text[]$Other.programming, &quot; &quot;)
+
+# table of frequent words
+
+word_list &lt;- unlist(text[]$Other.programming)
+words &lt;- as.data.frame((table(word_list)))
+words &lt;- words[order(-words$Freq),]
+knitr::kable(head(words), caption = &quot;Common Responses to Other Programming Experience&quot;)
+
+
+wordcloud(word = word_list, min.freq = 2, scale=c(7, 0.6), colors=brewer.pal(6, &quot;Dark2&quot;))
+
+barplot(words[1:6,]$Freq, names.arg = words[1:6,]$word_list, horiz = T, las = 1, density = 45, angle = 11, col = &quot;cornflowerblue&quot;, main = &quot;Other Programming Experience&quot;, xlab = &quot;Counts&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiSFc4X1BvcnRlcl9FcmljYSIKb3V0cHV0OgogIGh0bWxfZG9jdW1lbnQ6IGRlZmF1bHQKICBodG1sX25vdGVib29rOiBkZWZhdWx0Ci0tLQpgYGB7ciBzZXR1cCwgaW5jbHVkZSA9IEZ9CmxpYnJhcnkodGlkeXIsIHF1aWV0bHkgPSBULCB3YXJuLmNvbmZsaWN0cyA9IEYpCmxpYnJhcnkoZHBseXIsIHF1aWV0bHkgPSBULCB3YXJuLmNvbmZsaWN0cyA9IEYpCmxpYnJhcnkoc3RyaW5nciwgcXVpZXRseSA9IFQsd2Fybi5jb25mbGljdHMgPSBGKQpsaWJyYXJ5KHRpZHl0ZXh0KQpsaWJyYXJ5KHRpZHlzZWxlY3QpCmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KHRtKQpsaWJyYXJ5KGdncGxvdDIpICAKbGlicmFyeShSQ29sb3JCcmV3ZXIpCmxpYnJhcnkod29yZGNsb3VkKQpsaWJyYXJ5KGRhdGEudGFibGUpCmxpYnJhcnkobGV0dGVyY2FzZSkKYGBgCgoKI1Byb2JsZW0gMQpJIGhhdmUgYSBuZXcgcmVwb3NpdG9yeSB3aXRoIHRoZSBuYW1lIEVNUF9TdGF0cyB1bmRlciBteSB1c2VybmFtZSwgZXJpY2FtcC4gIFRoZSBsaW5rIHRvIG15IG5ldyByZXBvc2l0b3J5IGlzIGh0dHBzOi8vZ2l0aHViLmNvbS9lcmljYW1wL0VNUF9TdGF0cwoKCiNQcm9ibGVtIDIKTG9hZCBtdW5nZSBhbmQgY3JlYXRlIGEgc3RvcnkgZm9yIHRoZSBjbGFzcyBkYXRhc2V0OiBzdXJ2ZXlfZGF0YS50eHQuICBUaGUgZmlsZSBzdXJ2ZXlfZGF0YS50eHQgY29udGFpbnMgY29sdW1ucyBvZiBpbmZvcm1hdGlvbiBvcmlnaW5hbGx5IHdyaXR0ZW4gYnkgaGFuZCBieSBlYWNoIG9mIHVzIGluIHRoZSBjb3Vyc2Ugb24gdGhlIGZpcnN0IGRheSBvZiBjbGFzcy4gIFRoZXJlZm9yZSwgdGhlIHJlc3BvbnNlcyB2YXJ5IHNpZ25pZmljYW50bHkgaW4gZm9ybWF0LCBjb250ZW50LCBhbmQgbGVuZ3RoLiAgCgoqIEdvYWw6IHVzZSB0aWR5IGNvbmNlcHRzCgogICAgKyBFYWNoIHZhcmlhYmxlIGlzIGEgY29sdW1uCiAgICArIEVhY2ggb2JzZXJ2YXRpb24gaXMgYSByb3cKICAgICsgRWFjaCB0eXBlIG9mIG9ic2VydmF0aW9uYWwgdW5pdCBpcyBhIHRhYmxlCgpgYGB7ciB0ZXh0X3N0b3J5LCBlY2hvID0gRiwgZXZhbCA9IFR9Cgp1cmwgPC0gImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9yc2V0dGxhZ2UvU1RBVF81MDE0L21hc3Rlci8wOF90ZXh0X21pbmluZ19Sbm90ZWJvb2tzX2Jhc2hfc2VkX2F3ay9zdXJ2ZXlfZGF0YS50eHQiCgpjbmFtZSA8LSBmaWxlLnBhdGgoIn4iLCAiRGVza3RvcCIsICJ0ZXh0cyIpCmNuYW1lCmRpcihjbmFtZSkKCmRvY3MgPC0gVkNvcnB1cyhEaXJTb3VyY2UoY25hbWUpKSAgIApzdW1tYXJ5KGRvY3MpCmluc3BlY3QoZG9jc1sxXSkKd3JpdGVMaW5lcyhhcy5jaGFyYWN0ZXIoZG9jc1sxXSkpCiNkb2NzIDwtIHRtX21hcChkb2NzLHJlbW92ZVB1bmN0dWF0aW9uKQoKZHRtIDwtIERvY3VtZW50VGVybU1hdHJpeChkb2NzKQppbnNwZWN0KGR0bSkKCnRkbSA8LSBUZXJtRG9jdW1lbnRNYXRyaXgoZG9jcykKdGRtCgpmcmVxIDwtIGNvbFN1bXMoYXMubWF0cml4KGR0bSkpICAgCmxlbmd0aChmcmVxKQoKb3JkIDwtIG9yZGVyKGZyZXEpCgpkdG1zIDwtIHJlbW92ZVNwYXJzZVRlcm1zKGR0bSwgMC4yKSAgIyByZW1vdmUgc3BhcnNlIHN0dWZmCgpoZWFkKHRhYmxlKGZyZXEpLCAyMCkKCmZyZXEgPC0gY29sU3Vtcyhhcy5tYXRyaXgoZHRtcykpCmZyZXEKCmZyZXEgPC0gc29ydChjb2xTdW1zKGFzLm1hdHJpeChkdG0pKSwgZGVjcmVhc2luZz1UUlVFKSAgIApoZWFkKGZyZXEsIDE0KQoKZmluZEZyZXFUZXJtcyhkdG0sIGxvd2ZyZXEgPSAzKQoKd2YgPC0gZGF0YS5mcmFtZSh3b3JkPW5hbWVzKGZyZXEpLCBmcmVxPWZyZXEpICAgCmhlYWQod2YpCgoKcCA8LSBnZ3Bsb3Qoc3Vic2V0KHdmLCBmcmVxPjMpLCBhZXMoeCA9IHJlb3JkZXIod29yZCwgLWZyZXEpLCB5ID0gZnJlcSkpICsKICAgICAgICAgIGdlb21fYmFyKHN0YXQgPSAiaWRlbnRpdHkiKSArIAogICAgICAgICAgdGhlbWUoYXhpcy50ZXh0LnggPSBlbGVtZW50X3RleHQoYW5nbGU9NDUsIGhqdXN0PTEpKQoKc2V0LnNlZWQoMTQyKSAgIAp3b3JkY2xvdWQobmFtZXMoZnJlcSksIGZyZXEsIG1pbi5mcmVxPTIpCndvcmRjbG91ZChuYW1lcyhmcmVxKSwgZnJlcSwgbWluLmZyZXE9Miwgc2NhbGU9Yyg0LCAuMSksIGNvbG9ycz1icmV3ZXIucGFsKDYsICJEYXJrMiIpKSAgIAoKCnRleHQxIDwtIHJlYWRMaW5lcygiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3JzZXR0bGFnZS9TVEFUXzUwMTQvbWFzdGVyLzA4X3RleHRfbWluaW5nX1Jub3RlYm9va3NfYmFzaF9zZWRfYXdrL3N1cnZleV9kYXRhLnR4dCIpCmRvY3MgPC0gQ29ycHVzKFZlY3RvclNvdXJjZSh0ZXh0MSkpCmluc3BlY3QoZG9jcykKdG9TcGFjZSA8LSBjb250ZW50X3RyYW5zZm9ybWVyKGZ1bmN0aW9uICh4ICwgcGF0dGVybiApIGdzdWIocGF0dGVybiwgIiAiLCB4KSkKZG9jcyA8LSB0bV9tYXAoZG9jcywgdG9TcGFjZSwgIi8iKQoKdGV4dDIgPC0gcmVhZC50YWJsZSgifi9EZXNrdG9wL3RleHRzL3N1cnZleV9kYXRhLnR4dCIsIGhlYWRlciA9IFQsIHNlcCA9ICJcdCIpCnRleHQyW10gPC0gbGFwcGx5KHRleHQyLCB0b2xvd2VyKQoKCmBgYAoKCiNQcm9ibGVtIDMKCgoKI1Byb2JsZW0gNApJIGNyZWF0ZWQgYW4gYWNjb3VudCBhdCBhcmMudnQuZWR1LiAgSSBqdXN0IG5lZWQgdG8gZmlndXJlIG91dCBob3cgdG8gdXNlIFNTSCB0byBjaGVjayB0aGF0IGl0IHdvcmtzLi4u</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiSFc4X1BvcnRlcl9FcmljYSIKb3V0cHV0OgogIGh0bWxfZG9jdW1lbnQ6IGRlZmF1bHQKICBodG1sX25vdGVib29rOiBkZWZhdWx0CiAgcGRmX2RvY3VtZW50OiBkZWZhdWx0Ci0tLQpgYGB7ciBzZXR1cCwgaW5jbHVkZSA9IEZ9CmxpYnJhcnkodGlkeXIsIHF1aWV0bHkgPSBULCB3YXJuLmNvbmZsaWN0cyA9IEYpCmxpYnJhcnkoZHBseXIsIHF1aWV0bHkgPSBULCB3YXJuLmNvbmZsaWN0cyA9IEYpCmxpYnJhcnkoc3RyaW5nciwgcXVpZXRseSA9IFQsd2Fybi5jb25mbGljdHMgPSBGKQpsaWJyYXJ5KHRpZHl0ZXh0KQpsaWJyYXJ5KHRpZHlzZWxlY3QpCmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KHRtKQpsaWJyYXJ5KGdncGxvdDIpICAKbGlicmFyeShSQ29sb3JCcmV3ZXIpCmxpYnJhcnkod29yZGNsb3VkKQpsaWJyYXJ5KGRhdGEudGFibGUpCmxpYnJhcnkobGV0dGVyY2FzZSkKYGBgCgoKI1Byb2JsZW0gMQpJIGhhdmUgYSBuZXcgcmVwb3NpdG9yeSB3aXRoIHRoZSBuYW1lIEVNUF9TdGF0cyB1bmRlciBteSB1c2VybmFtZSwgZXJpY2FtcC4gIFRoZSBsaW5rIHRvIG15IG5ldyByZXBvc2l0b3J5IGlzIGh0dHBzOi8vZ2l0aHViLmNvbS9lcmljYW1wL0VNUF9TdGF0cwoKCiNQcm9ibGVtIDIKTG9hZCBtdW5nZSBhbmQgY3JlYXRlIGEgc3RvcnkgZm9yIHRoZSBjbGFzcyBkYXRhc2V0OiBzdXJ2ZXlfZGF0YS50eHQuICBUaGUgZmlsZSBzdXJ2ZXlfZGF0YS50eHQgY29udGFpbnMgY29sdW1ucyBvZiBpbmZvcm1hdGlvbiBvcmlnaW5hbGx5IHdyaXR0ZW4gYnkgaGFuZCBieSBlYWNoIG9mIHVzIGluIHRoZSBjb3Vyc2Ugb24gdGhlIGZpcnN0IGRheSBvZiBjbGFzcy4gIFRoZXJlZm9yZSwgdGhlIHJlc3BvbnNlcyB2YXJ5IHNpZ25pZmljYW50bHkgaW4gZm9ybWF0LCBjb250ZW50LCBhbmQgbGVuZ3RoLiAgCgoqIEdvYWw6IHVzZSB0aWR5IGNvbmNlcHRzCgogICAgKyBFYWNoIHZhcmlhYmxlIGlzIGEgY29sdW1uCiAgICArIEVhY2ggb2JzZXJ2YXRpb24gaXMgYSByb3cKICAgICsgRWFjaCB0eXBlIG9mIG9ic2VydmF0aW9uYWwgdW5pdCBpcyBhIHRhYmxlCiAgICAKSGVyZSBJIGRlY2lkZWQgdG8gaW5zcGVjdCBhbmQgYW5hbHl6ZS9wbG90IGFzcGVjdHMgb2YgdGhlIGxhc3QgY29sdW1uIGluIHRoZSBkYXRhLCAiT3RoZXIgUHJvZ3JhbW1pbmcsIiBzaW5jZSBpdCBzZWVtcyB0byBjb250YWluIHRoZSBsYXJnZXN0IGFtb3VudCBvZiB1bmlxdWUgd29yZHMgYW5kIGluZm9ybWF0aW9uLiAgSG93ZXZlciwgdGhlIGZvbGxvd2luZyBwcm9jZXNzIChhbmQgbW9yZSkgY291bGQgYmUgcGVyZm9ybWVkIG9uIHRoZSBlbnRpcmUgZGF0YSBzZXQuICBJIGZpcnN0IHJlYWQgdGhlIHN1cnZleV9kYXRhLnR4dCBmaWxlIGludG8gYSBkYXRhIGZyYW1lIHVzaW5nICRcdGV4dHR0e3JlYWQudGFibGV9JCBhbmQgcmVtb3ZlZCB1cHBlcmNhc2UgbGV0dGVycyB3aXRoICRcdGV4dHR0e3RvbG93ZXJ9JCB0byBtYWtlIGFuYWx5c2lzIGVhc2llci4gIE5leHQsIEkgdXNlZCBzZXZlcmFsICRcdGV4dHR0e2dzdWJ9JCBzdGF0ZW1lbnRzIHRvIHJlbW92ZSBwdW5jdHVhdGlvbiBhbmQgaW5zdGFuY2VzIG9mIHR3byBvciBtb3JlIHNwYWNlcy4gIEZpbmFsbHksIEkgdXNlZCAkXHRleHR0dHtzdHJzcGxpdH0kIHRvIHNlcGFyYXRlIHRoZSB3b3JkcyBpbiBlYWNoIHJvdyBhbmQgJFx0ZXh0dHR7dW5saXN0fSQgdG8gdHVybiB0aGUgbGlzdCBpbnRvIGEgdmVjdG9yLiAgSXQgY2VydGFpbmx5IHdhc24ndCB0aGUgbW9zdCBlbGVnYW50IHdheSB0byBnbyBhYm91dCB0aGluZ3MsIGJ1dCBpdCBhbGxvd2VkIG1lIHRvIHRoZW4gY3JlYXRlIGEgd29yZCBjbG91ZCBhbmQgYmFycGxvdCBvZiB0aGUgbW9zdCBjb21tb25seSBvY2N1cmluZyB3b3JkcyBpbiB0aGUgIk90aGVyIFByb2dyYW1taW5nIiBjb2x1bW4uICBUaGUgd29yZCBjbG91ZCB3b3VsZCBiZSBtb3JlIGFwcGVhbGluZyBmb3IgYSBsYXJnZXIgZGF0YSBzZXQgd2l0aCBtb3JlIHdvcmRzIHRvIGluY2x1ZGUsIGJ1dCB0aGlzIG9uZSBjZXJ0YWlubHkgZGVtb25zdHJhdGVzIHRoZSBnZW5lcmFsIHZpc3VhbCBhbmQgcG9zc2libGUgZXhlY3V0aW9uLiAgSSBoYXZlIGluY2x1ZGVkIHRoZSBwb3J0aW9ucyBvZiBjb2RlIGJlbG93IHRoYXQgd2VyZSB1c2VkIHRvIHJlYWQgaW4gdGhlIGluaXRpYWwgZGF0YSBhbmQgY3JlYXRlIHRoZSBncmFwaGljcy4gIEkndmUgYWxzbyBpbmNsdWRlZCBhIHNob3J0IHRhYmxlIG9mIHRoZSA2IHdvcmRzL3Byb2dyYW1taW5nIGxhbmd1YWdlcyB0aGF0IGFwcGVhciBtb3N0IGZyZXF1ZW50bHkgaW4gdGhlIGRhdGEgc2V0LgoKCmBgYHtyIHRleHQxLCBlY2hvID0gVCwgZXZhbCA9IFR9CiMgcmVhZCBpbiB0aGUgZGF0YSBhbmQgcmVtb3ZlIGFsbCB1cHBlcmNhc2UKCnRleHQgPC0gcmVhZC50YWJsZSgifi9EZXNrdG9wL3RleHRzL3N1cnZleV9kYXRhLnR4dCIsIGhlYWRlciA9IFQsIHNlcCA9ICJcdCIpCnRleHRbXSA8LSBsYXBwbHkodGV4dCwgdG9sb3dlcikKCmBgYAoKCmBgYHtyIHRleHQyLCBlY2hvID0gRiwgZXZhbCA9IFR9CiMgdXNlIGdzdWIgdG8gcmVtb3ZlIHB1bmN0dWF0aW9uIGFuZCBleHRyYSBzcGFjZXMKCnRleHRbXSRPdGhlci5wcm9ncmFtbWluZyA8LSBnc3ViKCIsIiwgIiAiLCB0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcpCnRleHRbXSRPdGhlci5wcm9ncmFtbWluZyA8LSBnc3ViKCIgICIsICIgIiwgdGV4dFtdJE90aGVyLnByb2dyYW1taW5nKQp0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcgPC0gZ3N1YigiLyIsICIgIiwgdGV4dFtdJE90aGVyLnByb2dyYW1taW5nKQp0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcgPC0gZ3N1YigiLSIsICIgIiwgdGV4dFtdJE90aGVyLnByb2dyYW1taW5nKQp0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcgPC0gZ3N1YigiXFwoIiwgIiAiLCB0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcpCnRleHRbXSRPdGhlci5wcm9ncmFtbWluZyA8LSBnc3ViKCJcXCkiLCAiICIsIHRleHRbXSRPdGhlci5wcm9ncmFtbWluZykKdGV4dFtdJE90aGVyLnByb2dyYW1taW5nIDwtIGdzdWIoIiAgIiwgIiAiLCB0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcpCgojIHNwbGl0IHN0cmluZ3MgaW50byBpbmRpdmlkdWFsIHdvcmRzIHRvIGFuYWx5emUKCnRleHRbXSRPdGhlci5wcm9ncmFtbWluZyA8LSBzdHJzcGxpdCh0ZXh0W10kT3RoZXIucHJvZ3JhbW1pbmcsICIgIikKCiMgdGFibGUgb2YgZnJlcXVlbnQgd29yZHMKCndvcmRfbGlzdCA8LSB1bmxpc3QodGV4dFtdJE90aGVyLnByb2dyYW1taW5nKQp3b3JkcyA8LSBhcy5kYXRhLmZyYW1lKCh0YWJsZSh3b3JkX2xpc3QpKSkKd29yZHMgPC0gd29yZHNbb3JkZXIoLXdvcmRzJEZyZXEpLF0Ka25pdHI6OmthYmxlKGhlYWQod29yZHMpLCBjYXB0aW9uID0gIkNvbW1vbiBSZXNwb25zZXMgdG8gT3RoZXIgUHJvZ3JhbW1pbmcgRXhwZXJpZW5jZSIpCgpgYGAKCmBgYHtyIHRleHQzLCBlY2hvID0gVCwgZXZhbCA9IFR9Cgp3b3JkY2xvdWQod29yZCA9IHdvcmRfbGlzdCwgbWluLmZyZXEgPSAyLCBzY2FsZT1jKDcsIDAuNiksIGNvbG9ycz1icmV3ZXIucGFsKDYsICJEYXJrMiIpKQoKYmFycGxvdCh3b3Jkc1sxOjYsXSRGcmVxLCBuYW1lcy5hcmcgPSB3b3Jkc1sxOjYsXSR3b3JkX2xpc3QsIGhvcml6ID0gVCwgbGFzID0gMSwgZGVuc2l0eSA9IDQ1LCBhbmdsZSA9IDExLCBjb2wgPSAiY29ybmZsb3dlcmJsdWUiLCBtYWluID0gIk90aGVyIFByb2dyYW1taW5nIEV4cGVyaWVuY2UiLCB4bGFiID0gIkNvdW50cyIpCgpgYGAKCgojUHJvYmxlbSAzCgoKCiNQcm9ibGVtIDQKSSBjcmVhdGVkIGFuIGFjY291bnQgYXQgYXJjLnZ0LmVkdSBhbmQgSSB0ZXN0ZWQgbXkgbG9naW4gdGhyb3VnaCBTU0g7IHRoZSBhY2NvdW50IGlzIHVuZGVyIG15IFBJRCwgJFx0ZXh0YmZ7ZXJpY2FtcH0kLgoKClxuZXdwYWdlCgojQXBwZW5kaXgKCmBgYHtyIEFwcGVuZGl4LCByZWYubGFiZWwgPSBjKCJ0ZXh0MSIsICJ0ZXh0MiIsICJ0ZXh0MyIpLCBldmFsID0gRn0=</div>
 
 
 
