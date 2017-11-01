@@ -5,20 +5,27 @@ output:
   html_notebook: default
   pdf_document: default
 ---
-```{r setup, include = F}
+```{r setup, include = F, message = F, warning = F}
 library(tidyr, quietly = T, warn.conflicts = F)
 library(dplyr, quietly = T, warn.conflicts = F)
 library(stringr, quietly = T,warn.conflicts = F)
-library(tidytext)
-library(tidyselect)
-library(tidyverse)
-library(tm)
-library(ggplot2)  
-library(RColorBrewer)
-library(wordcloud)
-library(data.table)
-library(lettercase)
-library(jsonlite)
+library(tidytext, quietly = T, warn.conflicts = F)
+library(tidyselect, quietly = T, warn.conflicts = F)
+library(tidyverse, quietly = T, warn.conflicts = F)
+library(tm, quietly = T, warn.conflicts = F)
+library(ggplot2, quietly = T, warn.conflicts = F)
+library(RColorBrewer, quietly = T, warn.conflicts = F)
+library(wordcloud, quietly = T, warn.conflicts = F)
+library(data.table, quietly = T, warn.conflicts = F)
+library(lettercase, quietly = T, warn.conflicts = F)
+library(jsonlite, quietly = T, warn.conflicts = F)
+library(ggraph, quietly = T, warn.conflicts = F)
+library(igraph, quietly = T, warn.conflicts = F)
+library(widyr, quietly = T, warn.conflicts = F)
+library(GGally, quietly = T, warn.conflicts = F)
+library(network, quietly = T, warn.conflicts = F)
+library(sna, quietly = T, warn.conflicts = F)
+library(geomnet, quietly = T, warn.conflicts = F)
 ```
 
 
@@ -81,15 +88,57 @@ barplot(words[1:6,]$Freq, names.arg = words[1:6,]$word_list, horiz = T, las = 1,
 
 
 #Problem 3
-Here I found another data set to analyze where the data is all text.  I initially found some other social media data sets, similar to the case study; these would have been super cool to analyze, but they were so large that I couldn't even open them without crashing my computer.  So, I found an unrelated data set which contains text from ads related to farm products; the data has some irrelevant information mixed in, for example it includes words where there were originally photos in the ads (so there are irrelevant words like photo, video, header, etc.).
+Here I found another data set to analyze where the data is all text.  I initially found some other social media data sets, similar to the case study; these would have been super cool to analyze, but they were so large that I couldn't even open them without crashing my computer.  So, I found an unrelated data set which contains text from ads related to farm products; the data appears to have some irrelevant information mixed in, for example it includes words where there were originally photos in the ads (so there are irrelevant words like photo, video, header, etc.).  However, there aren't very many special characters or special cases/columns, so les cleaning is required.  Below I attempted to create a barplot, network graph, and a word cloud from the data.
+
+Data: https://archive.ics.uci.edu/ml/machine-learning-databases/00218/
+
+Citation: Lichman, M. (2013). UCI Machine Learning Repository [http://archive.ics.uci.edu/ml]. Irvine, CA: University of California, School of Information and Computer Science.
 
 ```{r case_study, echo = F, eval = T}
 
+# read in data
+
 ads <- readLines("~/Desktop/farm-ads.txt")
-docs <- Corpus(VectorSource(ads))
-#inspect(docs)
+ads_vec <- Corpus(VectorSource(ads))
+
+# remove stop words and dashes
+
 remove_punc <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
-docs <- tm_map(docs, remove_punc, "-")
+ads_vec <- tm_map(ads_vec, remove_punc, "-")
+ads_vec <- tm_map(ads_vec, removeWords, stopwords("english"))
+ads_vec <- tm_map(ads_vec, removeWords, c("title", "ad", "picture", "header", "view", "profile"))
+ads_vec <- tm_map(ads_vec, stripWhitespace)
+
+# find common words
+
+dtm <- TermDocumentMatrix(ads_vec)
+ads.mat <- as.matrix(dtm)
+ads.mat <- sort(rowSums(ads.mat), decreasing=  TRUE)
+ads.frame <- data.frame(word = names(ads.mat), freq = ads.mat)
+knitr::kable(as.data.frame(head(ads.frame, 10)))
+
+# correlations
+
+health_cor <- as.data.frame(findAssocs(dtm, terms = "health", corlimit = 0.4))
+health_cor <- as.data.frame(cbind(rownames(health_cor), health_cor$health))
+colnames(health_cor) <- c("assoc_word", "Corr")
+health_cor <- as.tibble(health_cor)
+
+```
+
+```{r graphs, echo = T, eval = F, include = T}
+# My attempt at a network graph...
+
+net = network(health_cor, directed = TRUE)
+network.vertex.names(net) = as.vector(health_cor$assoc_word)
+ggnet2(net, node.size = 6, node.color = "gray", edge.size = 1, edge.color = "grey", label = T)
+
+# barplot of frequencies
+barplot(ads.frame[1:10,]$freq, las = 2, names.arg = ads.frame[1:10,]$word,
+        col = "lightpink", main = "Most frequent words in farm ads")
+
+# wordcloud
+wordcloud(words = as.vector(ads.frame$word), freq = as.vector(ads.frame$freq), min.freq = 2000, scale = c(4, 0.6), colors=brewer.pal(6, "Dark2"))
 
 ```
 
@@ -102,4 +151,4 @@ I created an account at arc.vt.edu and I tested my login through SSH; the accoun
 
 #Appendix
 
-```{r Appendix, ref.label = c("text1", "text2", "text3"), eval = F}
+```{r Appendix, ref.label = c("text1", "text2", "text3", "case_study", "graphs"), eval = F}
