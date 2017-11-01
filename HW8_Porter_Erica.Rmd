@@ -18,6 +18,7 @@ library(RColorBrewer)
 library(wordcloud)
 library(data.table)
 library(lettercase)
+library(jsonlite)
 ```
 
 
@@ -80,7 +81,17 @@ barplot(words[1:6,]$Freq, names.arg = words[1:6,]$word_list, horiz = T, las = 1,
 
 
 #Problem 3
+Here I found another data set to analyze where the data is all text.  I initially found some other social media data sets, similar to the case study; these would have been super cool to analyze, but they were so large that I couldn't even open them without crashing my computer.  So, I found an unrelated data set which contains text from ads related to farm products; the data has some irrelevant information mixed in, for example it includes words where there were originally photos in the ads (so there are irrelevant words like photo, video, header, etc.).
 
+```{r case_study, echo = F, eval = T}
+
+ads <- readLines("~/Desktop/farm-ads.txt")
+docs <- Corpus(VectorSource(ads))
+#inspect(docs)
+remove_punc <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, remove_punc, "-")
+
+```
 
 
 #Problem 4
