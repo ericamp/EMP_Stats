@@ -22,44 +22,45 @@ knitr::opts_chunk$set(echo = TRUE)
     library(csv)
 ```
 
-Recreate simple.py example first
-```{python, eval=T, echo=F, include=T, engine.path = "/Users/EricaPorter/anaconda3/bin/pythonw"}
+Below I just recreated the simple.py example to figure out how the file inputs work.
+```{python practice, eval = T, echo = F, include = T, engine.path = "/Users/EricaPorter/anaconda3/bin/pythonw"}
 
 from os import path
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
-# Read the whole text.
-
 text = open('constitution.txt').read()
 
-# Generate a word cloud image
 wordcloud = WordCloud().generate(text)
-
-# Display the generated image:
-# the matplotlib way:
 
 plt.imshow(wordcloud, interpolation='bilinear')
 plt.axis("off")
 
-# lower max_font_size
-wordcloud = WordCloud(max_font_size=40).generate(text)
+wordcloud = WordCloud(max_font_size = 40).generate(text)
 plt.figure()
-plt.imshow(wordcloud, interpolation="bilinear")
+plt.imshow(wordcloud, interpolation = "bilinear")
 plt.axis("off")
 
 plt.savefig("constitution.png")
 ```
-## Constitution as a word cloud
 
-```{r, out.height="550px",out.width="500px",eval=T, echo=F, include=T}
+```{r print1, out.height = "550px", out.width = "500px", eval = T, echo = F, include = T}
     knitr::include_graphics("constitution.png")
 ```
 
 
-colored.py example
-```{python, eval=T, echo=F, include=T, engine.path = "/Users/EricaPorter/anaconda3/bin/pythonw"}
+Below I replicated the masked.py example from https://github.com/amueller/word_cloud/tree/master/examples.  This code from Andreas Mueller creates a word cloud based upon the text from "Alice's Adventures in Wonderland" by Lewis Carroll, overlays the word cloud on an image of the character, Alice, and adds color to the text in the generated word cloud.
 
+Some notes/remarks about the changes/installation:
+
+* I specified the engine path to be used, in case some libraries were installed under Python 2.7.
+* I specified 'python' in the display options above each code chunk instead of 'r,' to let R know to use my Python interprete in order to run Python code.
+* I downloaded and moved all files necessary to generate the word cloud to the directory that houses my homework file and is connected to my Git repository.
+* I also had to reset my working directory appropriately, as I had unknowingly switched to another directory when working on regression homework.
+* The original code from Andreas Mueller's repository included code to create and open the word cloud as an image, rather than include it in an html document.  So, the constitution.txt example (from the lecture slides), uses $\texttt{plt.savefig}$ and the alice.txt example uses $\texttt{wc.to_file}$ and then a $\texttt{knitr}$ statement to include the picture in the knitted html document.
+* The given code from https://github.com/amueller/word_cloud/blob/master/examples/masked.py creates an object for the alice.txt document, creates a color array, removes one stop word, plots a word cloud over the image of Alice, and writes the word cloud to an object that we can print/view.
+
+```{python wordcloud, eval = T, echo = F, include = T, engine.path = "/Users/EricaPorter/anaconda3/bin/pythonw"}
 
 from os import path
 from PIL import Image
@@ -68,19 +69,18 @@ import matplotlib.pyplot as plt
 
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
-#d = path.dirname(__file__)
-
-# Read the whole text.
+# Read the whole text for "Alice's Adventures in Wonderland" this time
 text = open('alice.txt').read()
 
-# read the mask / color image taken from
-# http://jirkavinse.deviantart.com/art/quot-Real-Life-quot-Alice-282261010
+# read the image to be used as a mask
+# the image of Alice taken from http://jirkavinse.deviantart.com/art/quot-Real-Life-quot-Alice-282261010
 alice_coloring = np.array(Image.open("alice_color.png"))
 stopwords = set(STOPWORDS)
 stopwords.add("said")
 
-wc = WordCloud(background_color="white", max_words=2000, mask=alice_coloring,
-               stopwords=stopwords, max_font_size=40, random_state=42)
+wc = WordCloud(background_color = "white", max_words = 2000, mask = alice_coloring,
+               stopwords = stopwords, max_font_size = 40, random_state = 42)
+               
 # generate word cloud
 wc.generate(text)
 
@@ -88,24 +88,20 @@ wc.to_file("alice.png")
 
 # create coloring from image
 image_colors = ImageColorGenerator(alice_coloring)
-
-#plt.savefig("alice_cloud.png")
-
-# show
-#plt.imshow(wc, interpolation="bilinear")
-#plt.axis("off")
-#plt.figure()
-# recolor wordcloud and show
-# we could also give color_func=image_colors directly in the constructor
-#plt.imshow(wc.recolor(color_func=image_colors), interpolation="bilinear")
-#plt.axis("off")
-#plt.figure()
-#plt.imshow(alice_coloring, cmap=plt.cm.gray, interpolation="bilinear")
-#plt.axis("off")
-
-
 ```
 
-```{r, out.height="550px",out.width="500px",eval=T, echo=F, include=T}
+```{r print2, out.height="550px",out.width="500px",eval=T, echo=F, include=T}
     knitr::include_graphics("alice.png")
 ```
+
+Code, files, and images obtained from the following Github repository:
+
+Mueller, Andreas, amueller/word_cloud, 3 Sept. 2017, GitHub repository, github.com/amueller/word_cloud/tree/master/examples
+
+
+#Appendix: replicated code from amueller/word_cloud
+
+```{r Appendix, ref.label = c("practice", "print1", "wordcloud", "print2", "graphs"), eval = F}
+
+```
+
