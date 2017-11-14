@@ -1,0 +1,58 @@
+---
+title: "Untitled"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(maps)
+library(ggplot2)
+```
+
+```{r data, echo = F, eval = T}
+schools <- read.csv("~/Desktop/schools.csv", header = T)
+
+```
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+schools <- read.csv("~/Desktop/schools.csv", header = T)
+schools <- schools[-52,]
+
+all_states <- map_data("state")
+schools$State.Name <- unlist(lapply(schools$State.Name, tolower))
+schools$Pupil.Teacher.Ratio..State..2014.15 <- as.numeric(schools$Pupil.Teacher.Ratio..State..2014.15)
+schools$region <- schools$State.Name
+Total <- merge(all_states, schools, by = "region")
+Total <- Total[Total$region!="district of columbia",]
+
+p <- ggplot()
+p <- p + geom_polygon(data=Total, aes(x=long, y=lat, group = group, fill=Total$Pupil.Teacher.Ratio..State..2014.15),colour="white"
+      ) + scale_fill_continuous(low = "thistle2", high = "maroon1", guide="colorbar")
+P1 <- p + theme_bw()  + labs(fill = "" 
+                            ,title = "2014-2015 States by Student/Teacher Ratio", x="", y="")
+P1 + scale_y_continuous(breaks=c()) + scale_x_continuous(breaks=c()) + theme(panel.border =  element_blank())
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+plot(schools$Total.Number.of.Public.Schools..Public.School..2014.15, schools$Pupil.Teacher.Ratio..State..2014.15, xlab = "Total Number of Public Schools", ylab = "Student/Teacher Ratio", main = "Static Example Graph for Student/Teacher Ratio", pch = 25)
+```
+
+### Chart C
+
+```{r}
+
+```
+
